@@ -1,10 +1,9 @@
-
 install:
 	go install github.com/nathanielc/nakethesnake
 .PHONY: install
 
 run: install
-	nakethesnake server
+	PORT=9000 nakethesnake server
 .PHONY: run
 
 test:

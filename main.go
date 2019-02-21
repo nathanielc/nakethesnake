@@ -15,7 +15,7 @@ func main() {
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "9000"
+		log.Fatal("missing PORT env var")
 	}
 
 	// Add filename into logging messages
