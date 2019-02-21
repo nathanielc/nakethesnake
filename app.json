@@ -1,0 +1,11 @@
+{
+  "name": "nakethesnake",
+  "description": "A simple BattleSnake AI written in Go..",
+  "keywords": [
+    "battlesnake",
+  ],
+  "repository": "https://github.com/nathanielc/nakethesnake",
+  "env": {
+    "BUILDPACK_URL": "https://github.com/kr/heroku-buildpack-go"
+  }
+}
