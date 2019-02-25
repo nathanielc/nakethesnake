@@ -52,9 +52,9 @@ func Move(res http.ResponseWriter, req *http.Request) {
 
 		if dx > dy {
 			if dx > 0 {
-				move = LEFT
-			} else {
 				move = RIGHT
+			} else {
+				move = LEFT
 			}
 		} else {
 			if dy > 0 {
