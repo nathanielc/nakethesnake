@@ -55,6 +55,7 @@ func Move(res http.ResponseWriter, req *http.Request) {
 		move = findFood(head, foods)
 	}
 	move = findSafe(&decoded, move)
+	log.Println(move)
 
 	respond(res, api.MoveResponse{
 		Move: move,
@@ -62,7 +63,14 @@ func Move(res http.ResponseWriter, req *http.Request) {
 }
 
 func distance(a, b api.Coord) int {
-	return b.X - a.X + b.Y - a.Y
+	return abs(b.X-a.X) + abs(b.Y-a.Y)
+}
+
+func abs(i int) int {
+	if i < 0 {
+		return i * -1
+	}
+	return i
 }
 
 func findFood(head api.Coord, foods []api.Coord) (move string) {
@@ -81,7 +89,7 @@ func findFood(head api.Coord, foods []api.Coord) (move string) {
 	dx := food.X - head.X
 	dy := food.Y - head.Y
 
-	if dx > dy {
+	if abs(dx) > abs(dy) {
 		if dx > 0 {
 			move = RIGHT
 		} else {
@@ -94,6 +102,7 @@ func findFood(head api.Coord, foods []api.Coord) (move string) {
 			move = UP
 		}
 	}
+	log.Println(dx, dy, move)
 	return
 }
 func findSafe(game *api.SnakeRequest, move string) string {
