@@ -32,6 +32,13 @@ const (
 	RIGHT = "right"
 )
 
+var moves = []string{
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
+}
+
 func Move(res http.ResponseWriter, req *http.Request) {
 	decoded := api.SnakeRequest{}
 	err := api.DecodeSnakeRequest(req, &decoded)
@@ -43,31 +50,97 @@ func Move(res http.ResponseWriter, req *http.Request) {
 	move := RIGHT
 	foods := decoded.Board.Food
 	if len(foods) > 0 {
-		food := foods[0]
 		head := decoded.You.Body[0]
-		dx := food.X - head.X
-		dy := food.Y - head.Y
-		log.Println("food", food)
-		log.Println("head", head)
-
-		if dx > dy {
-			if dx > 0 {
-				move = RIGHT
-			} else {
-				move = LEFT
-			}
-		} else {
-			if dy > 0 {
-				move = DOWN
-			} else {
-				move = UP
-			}
-		}
+		move = findFood(head, foods)
 	}
+	move = findSafe(&decoded, move)
 
 	respond(res, api.MoveResponse{
 		Move: move,
 	})
+}
+
+func findFood(head api.Coord, foods []api.Coord) (move string) {
+	food := foods[0]
+
+	dx := food.X - head.X
+	dy := food.Y - head.Y
+
+	if dx > dy {
+		if dx > 0 {
+			move = RIGHT
+		} else {
+			move = LEFT
+		}
+	} else {
+		if dy > 0 {
+			move = DOWN
+		} else {
+			move = UP
+		}
+	}
+	return
+}
+func findSafe(game *api.SnakeRequest, move string) string {
+	fm := makeFlat(game)
+	head := game.You.Body[0]
+	pos := movePos(head, move)
+	if isSafe(fm, pos) {
+		return move
+	}
+
+	for _, m := range moves {
+		pos := movePos(head, m)
+		if isSafe(fm, pos) {
+			return m
+		}
+	}
+	return move
+}
+
+func movePos(pos api.Coord, move string) api.Coord {
+	switch move {
+	case UP:
+		pos.Y -= 1
+	case DOWN:
+		pos.Y += 1
+	case LEFT:
+		pos.X -= 1
+	case RIGHT:
+		pos.X += 1
+	}
+	return pos
+}
+
+func isSafe(fm flatMap, pos api.Coord) bool {
+	return !fm.At(pos.X, pos.Y)
+}
+
+type flatMap struct {
+	w, h int
+	data []bool
+}
+
+func (m flatMap) At(x, y int) bool {
+	if x < 0 || y < 0 || x >= m.w || y >= m.h {
+		return true
+	}
+	return m.data[x+m.w*y]
+}
+
+func makeFlat(game *api.SnakeRequest) flatMap {
+	m := flatMap{
+		w:    game.Board.Width,
+		h:    game.Board.Height,
+		data: make([]bool, game.Board.Width*game.Board.Height),
+	}
+	for _, s := range game.Board.Snakes {
+		for _, coord := range s.Body {
+			i := coord.X + m.w*coord.Y
+			m.data[i] = true
+		}
+	}
+	return m
 }
 
 func End(res http.ResponseWriter, req *http.Request) {
