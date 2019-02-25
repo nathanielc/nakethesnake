@@ -18,12 +18,19 @@ func Start(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Printf("Bad start request: %v", err)
 	}
-	dump(decoded)
+	//dump(decoded)
 
 	respond(res, api.StartResponse{
 		Color: "#A5F3B4",
 	})
 }
+
+const (
+	UP    = "up"
+	DOWN  = "down"
+	LEFT  = "left"
+	RIGHT = "right"
+)
 
 func Move(res http.ResponseWriter, req *http.Request) {
 	decoded := api.SnakeRequest{}
@@ -31,10 +38,35 @@ func Move(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		log.Printf("Bad move request: %v", err)
 	}
-	dump(decoded)
+	//dump(decoded)
+
+	move := RIGHT
+	foods := decoded.Board.Food
+	if len(foods) > 0 {
+		food := foods[0]
+		head := decoded.You.Body[0]
+		dx := food.X - head.X
+		dy := food.Y - head.Y
+		log.Println("food", food)
+		log.Println("head", head)
+
+		if dx > dy {
+			if dx > 0 {
+				move = LEFT
+			} else {
+				move = RIGHT
+			}
+		} else {
+			if dy > 0 {
+				move = DOWN
+			} else {
+				move = UP
+			}
+		}
+	}
 
 	respond(res, api.MoveResponse{
-		Move: "down",
+		Move: move,
 	})
 }
 
