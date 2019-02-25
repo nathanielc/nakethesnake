@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"net/http"
 
 	"github.com/nathanielc/nakethesnake/api"
@@ -60,8 +61,22 @@ func Move(res http.ResponseWriter, req *http.Request) {
 	})
 }
 
+func distance(a, b api.Coord) int {
+	return b.X - a.X + b.Y - a.Y
+}
+
 func findFood(head api.Coord, foods []api.Coord) (move string) {
-	food := foods[0]
+	var minIdx, min int
+	min = math.MaxInt32
+	for i, f := range foods {
+		d := distance(head, f)
+		if d < min {
+			minIdx = i
+			min = d
+		}
+	}
+
+	food := foods[minIdx]
 
 	dx := food.X - head.X
 	dy := food.Y - head.Y
